@@ -1,6 +1,6 @@
 import os
 
-outputParameter = input("Введите параметр вывода: ")
+outputParameter = input("Что вы хотите вывести?")
 if (outputParameter == "Вакансии"):
     os.system('.\\Task#5.2.py')
 elif (outputParameter == "Статистика"):
