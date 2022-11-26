@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    table, th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+      text-align: center;
+    }
+
+    th, td{
+      padding: 5px;
+    }
+
+    body {
+      font-family: Verdana, sans-serif;
+    }
+    .tableByYear{
+      width: 100%;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    .tableByCity1, .tableByCity2 {
+      float: left;
+      width: 45%;
+    }
+
+    .tableByCity1{
+      margin-left: 15px;
+      margin-right: 30px;
+    }
+
+    .img{
+      text-align: center;
+    }
+  </style>
+
+</head>
+
+<body>
+  <h1>Аналитика по зарплатам и городам для профессии {{vacancyName}}</h1>
+  <div class ="img">
+    <img src="file:///Users/Andrei/PycharmProjects/HomeworkPython/Homework7/graph.png" alt="IMG">
+  </div>
+  <h2>Статистика по годам</h2>
+  <table class="tableByYear">
+    <tr>
+      {%  for header in headingsByYear%}
+      <th>
+        {{header}}
+      </th>
+      {% endfor %}
+    </tr>
+    {%  for year in dynamicsSalaries.keys()%}
+    <tr>
+      <td>{{year}}</td>
+      <td>{{dynamicsSalaries[year]}}</td>
+      <td>{{dynamicsSalariesAtVacancy[year]}}</td>
+      <td>{{dynamicsCountVacancies[year]}}</td>
+      <td>{{dynamicsCountVacanciesAtVacancy[year]}}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <h2>Статистика по городам</h2>
+  <div class="cityTables">
+    <div class=table1>
+      <table class="tableByCity1">
+        <tr>
+          {%  for header in headingsByCity[:2]%}
+          <th>
+            {{header}}
+          </th>
+          {% endfor %}
+        </tr>
+        {%  for data in citiesSalaryLevel.items()%}
+        <tr>
+          <td>{{data[0]}}</td>
+          <td>{{data[1]}}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+    <div class=table2>
+      <table class="tableByCity2">
+        <tr>
+          {%  for header in headingsByCity[3:]%}
+          <th>
+            {{header}}
+          </th>
+          {% endfor %}
+        </tr>
+        {%  for data in citiesRatioVacancies.items()%}
+        <tr>
+          <td>{{data[0]}}</td>
+          <td>{{data[1]}}</td>
+        </tr>
+        {% endfor %}
+      </table>
+    <div>
+  </div>
+</body>
+
+</html>
