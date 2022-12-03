@@ -8,29 +8,87 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 from openpyxl.styles import Font, NamedStyle, Side, Border
 from jinja2 import Environment, FileSystemLoader
+from collections import OrderedDict
 
 
 class Vacancy:
+    """
+    Класс представления вакансии.
+
+    Attributes:
+        name (str): Название вакансии
+        salary (Salary): Представление запрлаты
+        areaName (str): Название города
+        publishedAt (str): Дата публикации
+    """
+
     def __init__(self, name, salary, areaName, publishedAt):
+        """
+        Инициализирует объект Vacancy
+
+        Args:
+            name (str): Название вакансии
+            salary (Salary): Представление запрлаты
+            areaName (str): Название города
+            publishedAt (str): Дата публикации
+        """
         self.name, self.salary, self.areaName, self.publishedAt = name, salary, areaName, publishedAt
 
 
 class DataSet:
+    """
+    Класс, отвечающий за чтение и подготовку данных из CSV-файла.
+
+    Attributes:
+        fileName (str): Название файла
+        correctFields (list[str]): Поля необходимые для инициализации вакансии
+        vacancyNameParameter (str): Название выбранной профессии
+        vacanciesByYear (dict): Общая динамика вакансий по годам
+        vacancyByYear (dict): Динамика вакансий по годам для выбранной профессии
+        vacanciesByArea (dict): Общая динамика вакансий по городам
+        vacanciesObjects (list[Vacancy]): Список всех вакансий
+        period (list[int]): Период лет
+    """
     correctFields = ["name", "salary_from", "area_name", "published_at"]
 
     def __init__(self, fileName, vacancyNameParameter):
+        """
+        Инициализирует объект DataSet
+
+        Args:
+            fileName (str): Название файла
+            vacancyNameParameter (str): Название выбранной профессии
+        """
         self.fileName = fileName
         self.vacancyNameParameter = vacancyNameParameter
-        self.__UniversalParserCSV(fileName)
+        self.vacanciesObjects = self.__UniversalParserCSV(fileName)
         self.vacanciesByYear = self.__VacancyFilterByYear()
         self.vacancyByYear = self.__VacancyFilterByYear(self.vacancyNameParameter)
         self.vacanciesByArea = self.__VacancyFilterByArea()
 
     def __UniversalParserCSV(self, fileName):
+        """
+        Парсит CSV файл по вакансиям в список
+
+        Args:
+            fileName (str): Название файла
+
+        Returns:
+            list[Vacancy]: Список всех вакансий
+        """
         fileReader, columnNames = self.__CsvReader(fileName)
-        self.vacanciesObjects = self.__CsvFilter(fileReader, columnNames)
+        vacanciesObjects = self.__CsvFilter(fileReader, columnNames)
+        return vacanciesObjects
 
     def __CsvReader(self, fileName):
+        """
+        Считывает CSV файл.
+        Если файл пустой - выводит строку "Пустой файл" и прерывает работу программы,
+        иначе - возвращает все строки из файла в виде OrderedDict и список заголовков полей
+
+        Args:
+            fileName (str): Название файла
+        """
         file = open(fileName, encoding='utf-8-sig', newline='')
         if os.stat(fileName).st_size == 0:
             print("Пустой файл")
@@ -40,6 +98,16 @@ class DataSet:
         return fileReader, columnNames
 
     def __CsvFilter(self, fileReader, columnNames):
+        """
+        Обрабатывает полученные на вход словари, возвращает список всех вакансий
+
+        Args:
+            fileReader: Все строки из файла в виде словарей
+            columnNames: Список заголовков полей
+
+        Returns:
+            list[Vacancy]: Список всех вакансий
+        """
         vacancies = []
         columnsCount = len(columnNames)
         for row in fileReader:
@@ -51,6 +119,13 @@ class DataSet:
         return vacancies
 
     def DynamicsSalaries(self):
+        """
+        Обрабатывает общую динамику вакансий по годам,
+        возвращает динамику уровня зарплат по годам
+
+        Returns:
+            dict: Динамика уровня зарплат по годам
+        """
         dinamicsSalaries = self.vacanciesByYear.copy()
         for dataByYear in dinamicsSalaries.items():
             averagesByYear = [vacancy.salary.GetAverage() for vacancy in dataByYear[1]]
@@ -58,30 +133,57 @@ class DataSet:
         return dinamicsSalaries
 
     def DynamicsCountVacancies(self):
+        """
+        Обрабатывает общую динамику вакансий по годам,
+        возвращает динамику количества вакансий по годам
+
+        Returns:
+            dict: Динамика количества вакансий по годам
+        """
         vacancyCountByYear = self.vacanciesByYear.copy()
         for dataByYear in vacancyCountByYear.items():
             vacancyCountByYear[dataByYear[0]] = len(dataByYear[1])
         return vacancyCountByYear
 
     def DynamicsSalariesAtVacancy(self):
+        """
+        Обрабатывает динамику вакансий по годам для выбранной профессии,
+        возвращает динамику уровня зарплат по годам для выбранной профессии
+
+        Returns:
+            dict: Динамика уровня зарплат по годам для выбранной профессии
+        """
         dinamicsSalaries = self.vacancyByYear.copy()
         if not dinamicsSalaries:
-            return {key: 0 for key in self.currentKeys}
+            return {key: 0 for key in self.period}
         for dataByYear in dinamicsSalaries.items():
             averagesByYear = [vacancy.salary.GetAverage() for vacancy in dataByYear[1]]
             dinamicsSalaries[dataByYear[0]] = int(sum(averagesByYear) / len(averagesByYear))
         return dinamicsSalaries
 
     def DynamicsCountVacanciesAtVacancy(self):
+        """
+        Обрабатывает динамику вакансий по годам для выбранной профессии,
+        возвращает динамику количества вакансий по годам для выбранной профессии
 
+        Returns:
+            dict: Динамика уровня зарплат по годам для выбранной профессии
+        """
         vacancyCountByYear = self.vacancyByYear.copy()
         if not vacancyCountByYear:
-            return {key: 0 for key in self.currentKeys}
+            return {key: 0 for key in self.period}
         for dataByYear in vacancyCountByYear.items():
             vacancyCountByYear[dataByYear[0]] = len(dataByYear[1])
         return vacancyCountByYear
 
     def CitiesSalaryLevel(self):
+        """
+        Обрабатывает общую динамику вакансий по городам,
+        возвращает динамику уровня зарплат по городам (в порядке убывания, первые 10 значений)
+
+        Returns:
+            dict: Динамика уровня зарплат по городам
+        """
         vacanciesByArea = self.vacanciesByArea.copy()
         for dataByArea in vacanciesByArea.items():
             averagesByArea = [vacancy.salary.GetAverage() for vacancy in dataByArea[1]]
@@ -92,6 +194,13 @@ class DataSet:
         return vacanciesByArea
 
     def CitiesRatioVacancies(self):
+        """
+        Обрабатывает общую динамику вакансий по городам,
+        возвращает динамику доли вакансий по городам (в порядке убывания, первые 10 значений)
+
+        Returns:
+            dict: Доля вакансий по городам (в порядке убывания)
+        """
         vacanciesByArea = self.vacanciesByArea.copy()
         for dataByArea in vacanciesByArea.items():
             vacanciesByArea[dataByArea[0]] = round(len(dataByArea[1]) / len(self.vacanciesObjects), 4)
@@ -101,16 +210,34 @@ class DataSet:
         return vacanciesByArea
 
     def __VacancyFilterByYear(self, vacancyName=None):
+        """
+        Обрабатывает список всех вакансий,
+        если указана профессиия - возвращает динамику вакансий по годам для выбранной профессии,
+        иначе - возвращает общую динамику профессий по годам
+
+        Args:
+            vacancyName: Название выбранной профессии
+
+        Returns:
+            dict: Динамика вакансий по годам
+        """
         dinamicsSalaries = {}
-        self.currentKeys = []
+        self.period = []
         for vacancy in self.vacanciesObjects:
             year = datetime.strptime(vacancy.publishedAt, '%Y-%m-%dT%H:%M:%S%z').year
-            self.currentKeys.append(year)
+            self.period.append(year)
             if vacancyName is None or vacancyName in vacancy.name:
                 dinamicsSalaries.setdefault(year, []).append(vacancy)
         return dinamicsSalaries
 
     def __VacancyFilterByArea(self):
+        """
+        Обрабатывает список всех вакансий,
+        возвращает общую динамику вакансий по городам
+
+        Returns:
+            dict: Общая динамика вакансий по годам
+        """
         vacanciesByArea = {}
         for vacancy in self.vacanciesObjects:
             vacanciesByArea.setdefault(vacancy.areaName, []).append(vacancy)
@@ -119,6 +246,18 @@ class DataSet:
         return vacanciesByArea
 
     def __ClearByArea(self, vacanciesByArea):
+        """
+        Обрабатывает общую динамику вакансий по городам,
+        возваращает общую динамику вакансий только тех городов,
+        в которых кол-во вакансий больше или равно 1% от общего числа вакансий
+        (при вычислении 1% применяется округление вниз)
+
+        Args:
+            vacanciesByArea: Общая динамика вакансий по городам
+
+        Returns:
+            dict: Общая динамика вакансий по городам
+        """
         tempAreas = vacanciesByArea.copy()
         for keyArea in vacanciesByArea.keys():
             if len(vacanciesByArea[keyArea]) / len(self.vacanciesObjects) < 0.01:
@@ -127,6 +266,16 @@ class DataSet:
 
 
 class Salary:
+    """
+    Класс представления зарплаты.
+
+    Attributes:
+        salaryFrom (int): Зарплато от
+        salaryTo (int): Зарплата до
+        salaryCurrency (str): Название валюты
+        currencyToRub (dict): Курс обмена валют
+    """
+
     currencyToRub = {
         "AZN": 35.68,
         "BYR": 23.91,
@@ -141,16 +290,50 @@ class Salary:
     }
 
     def __init__(self, salaryFrom, salaryTo, salaryCurrency):
+        """
+        Инициализирует объект Salary
+
+        Args:
+            salaryFrom (int): Зарплато от
+            salaryTo (int): Зарплата до
+            salaryCurrency (str): Название валюты
+        """
         self.salaryFrom, self.salaryTo, self.salaryCurrency = salaryFrom, salaryTo, salaryCurrency
 
     def ChangeCurrency(self, salary):
+        """
+        Конвертирует сумму из любой валюты в рубли
+
+        Args:
+            salary(float): Сумма
+
+        Returns:
+            int: Сумма в рублях
+        """
         return salary * self.currencyToRub[self.salaryCurrency]
 
     def GetAverage(self):
+        """
+        Считает среднюю зарплату в рублях по формуле (salaryFrom + salaryTo) / 2
+
+        Returns:
+            int: Средняя зарплата в рублях
+        """
         return self.ChangeCurrency((int(float(self.salaryFrom)) + int(float(self.salaryTo))) / 2)
 
 
 class InputConnect:
+    """
+    Класс, отвечающий за обработку параметров вводимых пользователем: название файла, название профессии,
+    а также вывож данных для таблицы на экран
+
+    Attributes:
+        __requests (dict): Словарь запросов данных пользователю
+        _responses (dict): Словарь выходных данных пользователю
+        fileName (str): Название файла
+        vacancyName (str): Название выбранной профессии
+    """
+
     __requests = {"Введите название файла: ": lambda fileName: fileName,
                   "Введите название профессии: ": lambda vacancyName: vacancyName}
 
@@ -164,15 +347,31 @@ class InputConnect:
                   "Доля вакансий по городам (в порядке убывания): ": lambda dataSet: dataSet.CitiesRatioVacancies()}
 
     def __init__(self):
+        """
+        Инициализирует объект InputConnect
+        """
         self.fileName, self.vacancyName = self.__GetData()
 
     def __GetData(self):
+        """
+        Запрашивает у пользователя все необходимые данные
+
+        Returns:
+            dict_values(list[str]): Данные введенные пользователем
+        """
         data = {}
         for request in self.__requests.keys():
             data[request] = input(request)
         return data.values()
 
     def PrintData(self, dataSet):
+        """
+        Выводит данные статистики вакансий в виде "Название динамики: соответствующая динамика"
+
+        Args:
+            dataSet (DataSet): Данные файла
+        """
+
         dataSet = self.GetListData(dataSet)
         for i, response in enumerate(self._responses.keys()):
             if i < 4:
@@ -182,6 +381,15 @@ class InputConnect:
                 print(f'{response}{outputData}')
 
     def GetListData(self, dataSet):
+        """
+        Преобразует данные из DataSet в данные соответсвующих динамик
+
+        Args:
+            dataSet (DataSet): Данные файла
+
+        Returns:
+            list[dict]: Данные соответсвующих динамик
+        """
         data = []
         for response in self._responses.items():
             data.append(response[1](dataSet))
@@ -189,15 +397,47 @@ class InputConnect:
 
 
 class Report:
+    """
+    Класс, формирующий отчет для пользователя
+    """
+
     def __init__(self, vacancyName):
+        """
+        Инициализирует объект Report
+
+        Args:
+            vacancyName (str): название профессий
+        """
+
         self.vacancyName = vacancyName
 
     def CheckEmptyText(self, value):
+        """
+
+        Args:
+            value:
+
+        Returns:
+
+        """
         if value is None:
             return ""
         return str(value)
 
     def __CompleteSheet(self, sheet, data, indexesData, count=None):
+        """
+        Заполняет таблицу данными из списка, в указанном диапазоне.
+        Если указано количество необходимых данных, отсчитывает количество от начала списка
+
+        Args:
+            sheet (Worksheet): Excel страница (таблица)
+            data list[dict]: Данные
+            indexesData (tuple): Диапазон данных
+            count (int): Количество данных
+
+        Returns:
+            Таблица с данными из списка, в указанном диапазоне.
+        """
         i, j = indexesData
         if count is None:
             count = len(data[i].keys()) + 1
@@ -209,13 +449,31 @@ class Report:
         return sheet
 
     def __CopySheetToSheet(self, sheet1, sheet2):
+        """
+        Копирует содержимое одной таблицы  в другую с отступом в один столбец
+
+        Args:
+            sheet1 (Worksheet): Копируемая таблица
+            sheet2 (Worksheet): Таблица, в которую необходимо скопировать данные
+
+        Returns:
+            Таблица с данными из другой таблицы
+        """
         maxColumn = sheet2.max_column
         for i in range(1, sheet1.max_row + 1):
             for j in range(1, sheet1.max_column + 1):
                 sheet2.cell(row=i + 1, column=maxColumn + j - 2).value = sheet1.cell(row=i, column=j).value
         return sheet2
 
-    def __StyleSheet(self, sheet, headings, headingsStyle, cellStyle):
+    def __StyleSheet(self, sheet, headingsStyle, cellStyle):
+        """
+        Устанавливает стили заголовков и ячеек для таблицы
+
+        Args:
+            sheet (Worksheet): Таблица
+            headingsStyle (NamedStyle): Стиль заголовков
+            cellStyle (NamedStyle): стиль ячеек
+        """
 
         for row in sheet.rows:
             for cell in row:
@@ -227,6 +485,12 @@ class Report:
             sheet.column_dimensions[column[0].column_letter].width = length + 2
 
     def GenerateExcel(self, listData):
+        """
+        Формирует Excel файл "report.xlsx", в котором представлены динамики данных из файла в виде таблиц
+
+        Args:
+            listData list[dict]: Данные файла
+        """
         book = openpyxl.Workbook()
         book.remove(book.active)
         sheet1 = book.create_sheet("Статистика по годам")
@@ -250,8 +514,8 @@ class Report:
         sheet2 = self.__CompleteSheet(sheet2, listData, (4, 5), 10)
         tempSheet = self.__CompleteSheet(tempSheet, listData, (5, 6), 10)
         sheet2 = self.__CopySheetToSheet(tempSheet, sheet2)
-        self.__StyleSheet(sheet1, headingsByYear, headingsStyle, cellStyle)
-        self.__StyleSheet(sheet2, headingsByCity, headingsStyle, cellStyle)
+        self.__StyleSheet(sheet1, headingsStyle, cellStyle)
+        self.__StyleSheet(sheet2, headingsStyle, cellStyle)
         book.remove(tempSheet)
 
         for cell in sheet2["C"]:
@@ -262,6 +526,21 @@ class Report:
         book.save("report.xlsx")
 
     def __CreateVerticalBars(self, ax, title, data1, data2, label1, label2, rotation):
+        """
+        Формирует вертикальную диаграмму для двух данных
+
+        Args:
+            ax (axes.SubplotBase): График
+            title (str): Заголовок диаграммы
+            data1 (dict): Общие данные
+            data2 (dict): Данные для выбранной профессии
+            label1 (str): Надпись легенды для общих данных
+            label2 (str): Надпись легенды для данные выбранной профессии
+            rotation (int): Угол поворота надписей оси X
+
+        Returns:
+            axes.SubplotBase: График
+        """
         xIndexes = np.arange(len(data1.keys()))
         width = 0.35
         ax.set_title(title)
@@ -273,6 +552,17 @@ class Report:
         return ax
 
     def __CreateHorizontalBar(self, ax, title, data):
+        """
+        Формирует горизонтальную диаграмму
+
+        Args:
+            ax (axes.SubplotBase): График
+            title (str): Заголовок диаграммы
+            data (dict): Данные
+
+        Returns:
+            axes.SubplotBase: График
+        """
         width = 0.35
         ax.set_title(title)
         ax.barh(list(data.keys())[:10], list(data.values())[:10], width)
@@ -281,12 +571,28 @@ class Report:
         return ax
 
     def __CreatePie(self, ax, title, data):
+        """
+        Формирует круговую диаграмму
+        Args:
+            ax (axes.SubplotBase): График
+            title (str): Заголовок диаграммы
+            data (dict): Данные
+
+        Returns:
+            axes.SubplotBase: График
+        """
         plt.rc('font', size=6)
         ax.set_title(title)
         ax.pie(data.values(), labels=data.keys(), labeldistance=1.1, startangle=-30)
         return ax
 
     def GenerateImage(self, listData):
+        """
+        Формирует изображение "graph.png" со статистикой вакансий в виде графиков
+
+        Args:
+            listData: Данные файла
+        """
         plt.rc('font', size=8)
         figure = plt.figure()
         ax1 = figure.add_subplot(2, 2, 1)
@@ -308,6 +614,13 @@ class Report:
         plt.show()
 
     def GeneratePDF(self, listData):
+        """
+        Формирует отчет  "report.pdf" со всей статистикой в виде графиков и таблицы
+
+        Args:
+            listData: Данные файла:
+        """
+
         self.GenerateExcel(listData)
         self.GenerateImage(listData)
 
