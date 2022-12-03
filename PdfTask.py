@@ -3,6 +3,7 @@ import sys
 import csv
 import os
 import openpyxl
+import doctest
 import numpy as np
 import matplotlib.pyplot as plt
 from datetime import datetime
@@ -318,6 +319,17 @@ class Salary:
 
         Returns:
             int: Средняя зарплата в рублях
+
+        >>> Salary(100, 200, "RUR").GetAverage()
+        150.0
+        >>> Salary(0, 200, "RUR").GetAverage()
+        100.0
+        >>> Salary(200, 0, "RUR").GetAverage()
+        100.0
+        >>> Salary(0, 0, "RUR").GetAverage()
+        0.0
+        >>> Salary(100, 100, "RUR").GetAverage()
+        100.0
         """
         return self.ChangeCurrency((int(float(self.salaryFrom)) + int(float(self.salaryTo))) / 2)
 
@@ -413,12 +425,14 @@ class Report:
 
     def CheckEmptyText(self, value):
         """
+        Проверяет ячейку на пустоту,
+        если ячейка пустая (None) - задает ячейке значение ""
 
         Args:
-            value:
+            value (str): Ячейка таблицы
 
         Returns:
-
+            str: значение ячейки
         """
         if value is None:
             return ""
@@ -646,10 +660,9 @@ class Report:
         config = pdfkit.configuration(wkhtmltopdf=r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe")
         pdfkit.from_string(pdfTemplate, "report.pdf", configuration=config, options=options)
 
-
-inputData = InputConnect()
-dataSet = DataSet(inputData.fileName, inputData.vacancyName)
-inputData.PrintData(dataSet)
-
-reportData = Report(dataSet.vacancyNameParameter)
-reportData.GeneratePDF(inputData.GetListData((dataSet)))
+# inputData = InputConnect()
+# dataSet = DataSet(inputData.fileName, inputData.vacancyName)
+# inputData.PrintData(dataSet)
+#
+# reportData = Report(dataSet.vacancyNameParameter)
+# reportData.GeneratePDF(inputData.GetListData((dataSet)))
