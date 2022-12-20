@@ -14,6 +14,29 @@ V2
 V3
 ![изображение](https://user-images.githubusercontent.com/103134410/205747579-12c5e1f0-69bf-4674-884a-979e3eed1a7e.png)
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 CsvSplitterByYear result
 ![изображение](https://user-images.githubusercontent.com/103134410/206735555-d98357f0-fe01-4397-a9ac-b80cacf80207.png)
 
