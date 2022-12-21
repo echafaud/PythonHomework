@@ -78,7 +78,6 @@ class CurrenciesParser:
         df = self.ApplyPreselection(df)
         self.conversionTable = self.CreateConversionTable(df)
         df["salary"] = df[["salary_from", "salary_to"]].mean(axis=1)
-        currRange = df[df["salary_currency"] != "RUR"].groupby(["published_at", "salary_currency"])
         df["salary"] = df.apply(lambda x: self.ConvertSalary(x), axis=1)
         df = df[df["salary"].notnull()]
         df.loc[:, ["name", "salary", "area_name", "published_at"]].to_csv("ConvertedVacancies.csv", index=False)
