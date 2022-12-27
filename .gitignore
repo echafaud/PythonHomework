@@ -4,7 +4,6 @@
 /venv
 *.csv
 *.xlsx
-*.png
-*.pdf
 !ConvertedVacanciesResultForGithub.csv
 !DistributorVacancies.csv
+*.db
