@@ -3,13 +3,11 @@ import sys
 import csv
 import os
 import openpyxl
-import doctest
 import numpy as np
 import matplotlib.pyplot as plt
-from datetime import datetime
 from openpyxl.styles import Font, NamedStyle, Side, Border
 from jinja2 import Environment, FileSystemLoader
-from collections import OrderedDict
+
 
 
 class Vacancy:

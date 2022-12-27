@@ -60,3 +60,4 @@ class Calculator:
         print("Динамика количества вакансий по годам:", generalCount)
         print("Динамика уровня зарплат по годам для выбранной профессии:", vacancySalaries)
         print("Динамика количества вакансий по годам для выбранной профессии:", vacancyCount)
+        return generalSalaries, generalCount, vacancySalaries, vacancyCount
