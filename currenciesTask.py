@@ -3,6 +3,6 @@ from Splitter import Splitter
 
 fileName = "vacancies_dif_currencies.csv"
 # fileName = "TestFile.csv"
-#splitter = Splitter(fileName, "CsvFilesCurrencyByYear", "CurrencyByYear")
+# splitter = Splitter(fileName, "CsvFilesCurrencyByYear", "CurrencyByYear")
 currenciesParser = CurrenciesParser(fileName)
-convertedCurrencies = currenciesParser.ConverToRub()
+convertedCurrencies, convertedCurrenciesFile = currenciesParser.ConvertToRub()
