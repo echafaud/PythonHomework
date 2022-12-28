@@ -37,3 +37,13 @@ CsvSplitterByYear result
 CsvSplitterByYear for currencies result
 
 ![изображение](https://user-images.githubusercontent.com/103134410/208475139-36fc224c-c655-416c-b206-af7df062d568.png)
+
+DataBaseConversionTable and dataBaseConvertedVacancies tasks result 
+
+<img width="1892" alt="screen" src="https://user-images.githubusercontent.com/103134410/209875987-65544e5e-4717-42a1-90b8-ff924bc2250c.png">
+
+DataBaseDynamicsResult
+
+<img width="1920" alt="Снимок экрана 2022-12-29 024643" src="https://user-images.githubusercontent.com/103134410/209876324-0d8f88aa-5f96-4a8e-ac40-63754ae603a5.png">
+
+<img width="637" alt="Снимок экрана 2022-12-29 024943" src="https://user-images.githubusercontent.com/103134410/209876364-019455cc-182f-4e06-bb78-0a53edb85a4b.png">
